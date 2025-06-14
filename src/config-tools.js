@@ -1,12 +1,8 @@
 const YAML = require("yaml");
 const fs = require("node:fs");
 const { execSync } = require("node:child_process");
-
-const {
-  getIp4FromMac,
-  generateUUIDv4,
-  generateNetworkMac,
-} = require("./net-tools");
+const crypto = require("node:crypto");
+const { getIp4FromMac, generateNetworkMac } = require("./net-tools");
 
 function readConfig(logger, configFile) {
   let configData;
@@ -44,7 +40,7 @@ function readAndCheckConfig(logger, configFile) {
   for (const onvifConfig of config.onvif) {
     //Generate a V4 UUID
     if (!onvifConfig.uuid) {
-      const newId = generateUUIDv4();
+      const newId = crypto.randomUUID();
       logger.info(`CONFIG: UUIDv4 - ${newId}`);
       onvifConfig.uuid = newId;
       isSaveRequired = true;
