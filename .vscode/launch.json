@@ -13,6 +13,8 @@
             "request": "launch",
             "preLaunchTask": "docker-run: debug",
             "platform": "node",
+            // "runtimeExecutable": "pnpm",
+            // "runtimeArgs": ["run", "dev"]
         }
     ]
 }

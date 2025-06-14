@@ -1,10 +1,10 @@
 const soap = require("soap");
-const http = require("http");
-const dgram = require("dgram");
+const http = require("node:http");
+const dgram = require("node:dgram");
 const xml2js = require("xml2js");
-const uuid = require("uuid"); // Reemplaza 'node-uuid' por 'uuid'
-const url = require("url");
-const fs = require("fs");
+const uuid = require("uuid");
+const url = require("node:url");
+const fs = require("node:fs");
 const logger = require("simple-node-logger");
 
 const { getIp4FromMac } = require("./net-tools");
@@ -25,7 +25,9 @@ module.exports = class OnvifServer {
     this.logger = logger;
 
     this.config.hostname = getIp4FromMac(logger, this.config.mac);
-    if (!this.config.hostname) return -1;
+    if (!this.config.hostname) {
+      throw new Error("Could not obtain IP address");
+    }
 
     this.videoSource = {
       attributes: {
@@ -144,11 +146,7 @@ module.exports = class OnvifServer {
             const abs_offset = Math.abs(offset);
             const hrs_offset = Math.floor(abs_offset / 60);
             const mins_offset = abs_offset % 60;
-            const tz =
-              "UTC" +
-              (offset < 0 ? "-" : "+") +
-              hrs_offset +
-              (mins_offset === 0 ? "" : ":" + mins_offset);
+            const tz = `UTC${offset < 0 ? "-" : "+"}${hrs_offset}${mins_offset === 0 ? "" : `:${mins_offset}`}`;
 
             return {
               SystemDateAndTime: {
@@ -193,8 +191,8 @@ module.exports = class OnvifServer {
 
             if (
               args.Category === undefined ||
-              args.Category == "All" ||
-              args.Category == "Device"
+              args.Category === "All" ||
+              args.Category === "Device"
             ) {
               response.Capabilities["Device"] = {
                 XAddr: `http://${this.config.hostname}:${this.config.ports.server}/onvif/device_service`,
@@ -258,8 +256,8 @@ module.exports = class OnvifServer {
             }
             if (
               args.Category === undefined ||
-              args.Category == "All" ||
-              args.Category == "Media"
+              args.Category === "All" ||
+              args.Category === "Media"
             ) {
               response.Capabilities["Media"] = {
                 XAddr: `http://${this.config.hostname}:${this.config.ports.server}/onvif/media_service`,
@@ -339,7 +337,7 @@ module.exports = class OnvifServer {
           GetSnapshotUri: (args) => {
             let uri = `http://${this.config.hostname}:${this.config.ports.server}/snapshot.png`;
             if (
-              args.ProfileToken == "sub_stream" &&
+              args.ProfileToken === "sub_stream" &&
               this.config.lowQuality &&
               this.config.lowQuality.snapshot
             )
@@ -360,7 +358,7 @@ module.exports = class OnvifServer {
           GetStreamUri: (args) => {
             try {
               let path = this.config.highQuality.rtsp;
-              if (args.ProfileToken == "sub_stream" && this.config.lowQuality)
+              if (args.ProfileToken === "sub_stream" && this.config.lowQuality)
                 path = this.config.lowQuality.rtsp;
 
               this.logger.debug(`GetStreamUri para path: ${path}`);
@@ -389,9 +387,9 @@ module.exports = class OnvifServer {
       },
     };
 
-    // Agregar registro al iniciar el servidor ONVIF
+    // Add log entry when starting the ONVIF server
     this.logger.info(
-      `ONVIF Server iniciado para ${this.config.name} en ${this.config.hostname}:${this.config.ports.server}`,
+      `ONVIF Server started for ${this.config.name} on ${this.config.hostname}:${this.config.ports.server}`,
     );
   }
 
@@ -399,14 +397,14 @@ module.exports = class OnvifServer {
     try {
       const action = url.parse(request.url, true).pathname;
       this.logger.debug(
-        `Solicitud recibida en: ${action} de ${request.socket.remoteAddress}`,
+        `Request received at: ${action} from ${request.socket.remoteAddress}`,
       );
 
       if (action === "/snapshot.png") {
         const image = fs.readFileSync("./resources/snapshot.png");
         response.writeHead(200, { "Content-Type": "image/png" });
         response.end(image, "binary");
-        this.logger.info(`Snapshot servido para ${this.config.name}`);
+        this.logger.info(`Snapshot served for ${this.config.name}`);
       } else if (
         action === "/onvif/device_service" ||
         action === "/onvif/media_service"
@@ -416,10 +414,10 @@ module.exports = class OnvifServer {
         response.writeHead(404, { "Content-Type": "text/plain" });
         response.write("404 Not Found\n");
         response.end();
-        this.logger.warn(`Ruta no encontrada: ${action}`);
+        this.logger.warn(`Route not found: ${action}`);
       }
     } catch (error) {
-      this.logger.error(`Error en listen: ${error.message}`);
+      this.logger.error(`Error in listen: ${error.message}`);
       response.writeHead(500, { "Content-Type": "text/plain" });
       response.end("Internal Server Error");
     }
@@ -432,7 +430,7 @@ module.exports = class OnvifServer {
 
     this.server = http.createServer(this.listen.bind(this));
 
-    // Agregar manejador de errores para el servidor HTTP
+    // Add error handler for the HTTP server
     this.server.on("error", (err) => {
       this.logger.error(
         `SERVER: ${this.config.name} - HTTP Server Error: ${err.message}`,
@@ -440,7 +438,7 @@ module.exports = class OnvifServer {
       this.restartServer();
     });
 
-    // Agregar manejador para el evento 'close' del servidor HTTP
+    // Add handler for the 'close' event of the HTTP server
     this.server.on("close", () => {
       this.logger.warn(`SERVER: ${this.config.name} - HTTP Server closed`);
       this.restartServer();
@@ -455,7 +453,7 @@ module.exports = class OnvifServer {
       forceSoap12Headers: true,
     });
 
-    // Agregar manejador de errores para el servicio SOAP de dispositivo
+    // Add error handler for the device SOAP service
     this.deviceService.on("error", (err) => {
       this.logger.error(
         `SERVER: ${this.config.name} - DeviceService Error: ${err.message}`,
@@ -463,7 +461,7 @@ module.exports = class OnvifServer {
       this.restartServer();
     });
 
-    // Agregar manejador para el evento 'close' del servicio SOAP de dispositivo
+    // Add handler for the 'close' event of the device SOAP service
     this.deviceService.on("close", () => {
       this.logger.warn(`SERVER: ${this.config.name} - DeviceService closed`);
       this.restartServer();
@@ -471,12 +469,12 @@ module.exports = class OnvifServer {
 
     this.deviceService.on("connection", (socket) => {
       this.logger.info(
-        `Dispositivo conectado: ${socket.remoteAddress}:${socket.remotePort}`,
+        `Device connected: ${socket.remoteAddress}:${socket.remotePort}`,
       );
     });
 
     this.deviceService.on("close", () => {
-      this.logger.warn(`Dispositivo desconectado: ${this.config.name}`);
+      this.logger.warn(`Device disconnected: ${this.config.name}`);
     });
 
     this.mediaService = soap.listen(this.server, {
@@ -486,7 +484,7 @@ module.exports = class OnvifServer {
       forceSoap12Headers: true,
     });
 
-    // Agregar manejador de errores para el servicio SOAP de medios
+    // Add error handler for the media SOAP service
     this.mediaService.on("error", (err) => {
       this.logger.error(
         `SERVER: ${this.config.name} - MediaService Error: ${err.message}`,
@@ -494,7 +492,7 @@ module.exports = class OnvifServer {
       this.restartServer();
     });
 
-    // Agregar manejador para el evento 'close' del servicio SOAP de medios
+    // Add handler for the 'close' event of the media SOAP service
     this.mediaService.on("close", () => {
       this.logger.warn(`SERVER: ${this.config.name} - MediaService closed`);
       this.restartServer();
@@ -502,12 +500,12 @@ module.exports = class OnvifServer {
 
     this.mediaService.on("connection", (socket) => {
       this.logger.info(
-        `Medios conectados: ${socket.remoteAddress}:${socket.remotePort}`,
+        `Media connected: ${socket.remoteAddress}:${socket.remotePort}`,
       );
     });
 
     this.mediaService.on("close", () => {
-      this.logger.warn(`Medios desconectados: ${this.config.name}`);
+      this.logger.warn(`Media disconnected: ${this.config.name}`);
     });
 
     this.mediaService.on("request", (request, methodName) => {
@@ -624,7 +622,7 @@ module.exports = class OnvifServer {
       );
     });
 
-    // Agregar manejador de errores para el socket de descubrimiento
+    // Add error handler for the discovery socket
     this.discoverySocket.on("error", (err) => {
       this.logger.error(
         `SERVER: ${this.config.name} - Discovery Socket Error: ${err.message}`,
@@ -640,7 +638,7 @@ module.exports = class OnvifServer {
       );
     });
 
-    // Agregar manejador para el evento 'close' del socket de descubrimiento
+    // Add handler for the 'close' event of the discovery socket
     this.discoverySocket.on("close", () => {
       this.logger.warn(`SERVER: ${this.config.name} - Discovery Socket closed`);
       this.restartDiscovery();

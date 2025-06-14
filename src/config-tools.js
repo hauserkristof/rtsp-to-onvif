@@ -1,6 +1,6 @@
 const YAML = require("yaml");
-const fs = require("fs");
-const { execSync } = require("child_process");
+const fs = require("node:fs");
+const { execSync } = require("node:child_process");
 
 const {
   getIp4FromMac,
@@ -32,8 +32,8 @@ function readConfig(logger, configFile) {
 }
 
 function sleep(seconds) {
-  const spawnSync = require("child_process").spawnSync;
-  var sleep = spawnSync("sleep", [seconds]);
+  const { spawnSync } = require("node:child_process");
+  spawnSync("sleep", [seconds]);
 }
 
 function readAndCheckConfig(logger, configFile) {
