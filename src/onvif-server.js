@@ -398,42 +398,30 @@ module.exports = class OnvifServer {
     );
   }
 
-  listen(request, response) {
-    try {
-      const action = url.parse(request.url, true).pathname;
-      this.logger.debug(
-        `Request received at: ${action} from ${request.socket.remoteAddress}`,
-      );
-
-      if (action === "/snapshot.png") {
-        const image = fs.readFileSync("./resources/snapshot.png");
-        response.writeHead(200, { "Content-Type": "image/png" });
-        response.end(image, "binary");
-        this.logger.info(`Snapshot served for ${this.config.name}`);
-      } else if (
-        action === "/onvif/device_service" ||
-        action === "/onvif/media_service"
-      ) {
-        // ...existing manejo de SOAP...
-      } else {
-        response.writeHead(404, { "Content-Type": "text/plain" });
-        response.write("404 Not Found\n");
-        response.end();
-        this.logger.warn(`Route not found: ${action}`);
-      }
-    } catch (error) {
-      this.logger.error(`Error in listen: ${error.message}`);
-      response.writeHead(500, { "Content-Type": "text/plain" });
-      response.end("Internal Server Error");
-    }
-  }
-
   startHttpServer() {
     this.logger.info(
       `SERVER: ${this.config.name} - HTTP listening on ${this.config.hostname}:${this.config.ports.server}`,
     );
 
-    this.server = http.createServer(this.listen.bind(this));
+    this.server = http.createServer();
+
+    // Handle snapshot requests directly
+    this.server.on("request", (request, response) => {
+      const action = url.parse(request.url, true).pathname;
+
+      if (action === "/snapshot.png") {
+        try {
+          const image = fs.readFileSync("./resources/snapshot.png");
+          response.writeHead(200, { "Content-Type": "image/png" });
+          response.end(image, "binary");
+          this.logger.info(`Snapshot served for ${this.config.name}`);
+        } catch (error) {
+          this.logger.error(`Error serving snapshot: ${error.message}`);
+          response.writeHead(404, { "Content-Type": "text/plain" });
+          response.end("Snapshot not found");
+        }
+      }
+    });
 
     // Add error handler for the HTTP server
     this.server.on("error", (err) => {
@@ -454,16 +442,7 @@ module.exports = class OnvifServer {
     this.deviceService = soap.listen(this.server, {
       path: "/onvif/device_service",
       services: this.onvif,
-      //   xml: fs.readFileSync("./wsdl/device_service.wsdl", "utf8"),
-      xml: `<?xml version="1.0" encoding="utf-8" ?>Add commentMore actions
-                    <wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:i0="http://www.onvif.org/ver10/device/wsdl" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://tempuri.org/">
-                      <wsdl:import namespace="http://www.onvif.org/ver10/device/wsdl" location="https://www.onvif.org/ver10/device/wsdl/devicemgmt.wsdl"/>
-                      <wsdl:service name="DeviceService">
-                        <wsdl:port name="Device" binding="i0:DeviceBinding">
-                          <soap:address location="http://${this.config.hostname}:${this.config.ports.server}/onvif/device_service"/>
-                        </wsdl:port>
-                      </wsdl:service>
-                    </wsdl:definitions>`,
+      xml: fs.readFileSync("./wsdl/device_service.wsdl", "utf8"),
       forceSoap12Headers: true,
     });
 
@@ -494,16 +473,7 @@ module.exports = class OnvifServer {
     this.mediaService = soap.listen(this.server, {
       path: "/onvif/media_service",
       services: this.onvif,
-      // xml: fs.readFileSync("./wsdl/media_service.wsdl", "utf8"),
-      xml: `<?xml version="1.0" encoding="utf-8" ?>Add commentMore actions
-                    <wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:i0="http://www.onvif.org/ver10/device/wsdl" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://tempuri.org/">
-                      <wsdl:import namespace="http://www.onvif.org/ver10/media/wsdl" location="https://www.onvif.org/ver10/media/wsdl/media.wsdl"/>
-                      <wsdl:service name="MediaService">
-                        <wsdl:port name="Media" binding="i0:MediaBinding">
-                          <soap:address location="http://${this.config.hostname}:${this.config.ports.server}/onvif/media_service" />
-                        </wsdl:port>
-                      </wsdl:service>
-                    </wsdl:definitions>`,
+      xml: fs.readFileSync("./wsdl/media_service.wsdl", "utf8"),
       forceSoap12Headers: true,
     });
 
