@@ -76,7 +76,7 @@ module.exports = class OnvifServer {
           Quality: this.config.highQuality.quality,
           RateControl: {
             FrameRateLimit: this.config.highQuality.framerate,
-            EncodingInterval: 10,
+            EncodingInterval: 30,
             BitrateLimit: this.config.highQuality.bitrate,
           },
           H264: {
@@ -125,7 +125,7 @@ module.exports = class OnvifServer {
           Quality: this.config.lowQuality.quality,
           RateControl: {
             FrameRateLimit: this.config.lowQuality.framerate,
-            EncodingInterval: 10,
+            EncodingInterval: 30,
             BitrateLimit: this.config.lowQuality.bitrate,
           },
           H264: {
