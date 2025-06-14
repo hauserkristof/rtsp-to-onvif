@@ -81,7 +81,8 @@ module.exports = class OnvifServer {
           },
           H264: {
             GovLength: this.config.highQuality.framerate,
-            H264Profile: "Main",
+            // H264Profile: "Main",
+            H264Profile: "High",
           },
           SessionTimeout: "PT16H40M",
         },
@@ -129,7 +130,8 @@ module.exports = class OnvifServer {
           },
           H264: {
             GovLength: this.config.lowQuality.framerate,
-            H264Profile: "Main",
+            // H264Profile: "Main",
+            H264Profile: "Low",
           },
           SessionTimeout: "PT16H40M",
         },
@@ -366,7 +368,7 @@ module.exports = class OnvifServer {
               if (args.ProfileToken === "sub_stream" && this.config.lowQuality)
                 path = this.config.lowQuality.rtsp;
 
-              this.logger.debug(`GetStreamUri para path: ${path}`);
+              this.logger.debug(`GetStreamUri for path: ${path}`);
 
               return {
                 MediaUri: {
