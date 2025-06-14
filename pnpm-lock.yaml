@@ -27,8 +27,8 @@ importers:
         specifier: ^0.6.2
         version: 0.6.2
       yaml:
-        specifier: 2.6.1
-        version: 2.6.1
+        specifier: 2.8.0
+        version: 2.8.0
     devDependencies:
       '@biomejs/biome':
         specifier: 1.9.4
@@ -301,9 +301,9 @@ packages:
     resolution: {integrity: sha512-NNXnzrkDrAzalLhIUc01jO2mOzXGXh1JwPgkihcLLzw98c0WgYDmmjSh1Kl3wzaxSVWMuA+fe0WTWOBDWCBmNA==}
     engines: {node: '>=0.6.0'}
 
-  yaml@2.6.1:
-    resolution: {integrity: sha512-7r0XPzioN/Q9kXBro/XPnA6kznR73DHq+GXh5ON7ZozRO6aMjbmiBuKste2wslTFkC5d1dw0GooOCepZXJ2SAg==}
-    engines: {node: '>= 14'}
+  yaml@2.8.0:
+    resolution: {integrity: sha512-4lLa/EcQCB0cJkyts+FpIRx5G/llPxfP6VQU5KByHEhLxY3IJCH0f0Hy1MHI8sClTvsIb8qwRJ6R/ZdlDJ/leQ==}
+    engines: {node: '>= 14.6'}
     hasBin: true
 
 snapshots:
@@ -553,4 +553,4 @@ snapshots:
 
   xpath@0.0.33: {}
 
-  yaml@2.6.1: {}
+  yaml@2.8.0: {}
