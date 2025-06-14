@@ -76,14 +76,14 @@ module.exports = class OnvifServer {
           Quality: this.config.highQuality.quality,
           RateControl: {
             FrameRateLimit: this.config.highQuality.framerate,
-            EncodingInterval: 1,
+            EncodingInterval: 10,
             BitrateLimit: this.config.highQuality.bitrate,
           },
           H264: {
             GovLength: this.config.highQuality.framerate,
             H264Profile: "Main",
           },
-          SessionTimeout: "PT1000S",
+          SessionTimeout: "PT16H40M",
         },
       },
     ];
@@ -124,14 +124,14 @@ module.exports = class OnvifServer {
           Quality: this.config.lowQuality.quality,
           RateControl: {
             FrameRateLimit: this.config.lowQuality.framerate,
-            EncodingInterval: 1,
+            EncodingInterval: 10,
             BitrateLimit: this.config.lowQuality.bitrate,
           },
           H264: {
             GovLength: this.config.lowQuality.framerate,
             H264Profile: "Main",
           },
-          SessionTimeout: "PT1000S",
+          SessionTimeout: "PT16H40M",
         },
       });
     }
