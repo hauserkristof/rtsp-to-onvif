@@ -1,0 +1,19 @@
+services:
+  rtsp-to-onvif:
+    # image: fparrav/rtsp-to-onvif:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - BUILD_DATE=${BUILD_DATE}
+        - VERSION=${VERSION}
+        - REVISION=${REVISION}
+    hostname: rtsp-to-onvif
+    #restart: unless-stopped
+    volumes:
+      - ./config.yaml:/onvif.yaml
+    network_mode: "host"   
+    cap_add:
+      - NET_ADMIN
+    environment: # uncomment this to get more debug info during setup
+      DEBUG: 1
