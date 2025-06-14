@@ -10,8 +10,8 @@ const logger = require("simple-node-logger");
 const { getIp4FromMac } = require("./net-tools");
 
 Date.prototype.stdTimezoneOffset = function () {
-  let jan = new Date(this.getFullYear(), 0, 1);
-  let jul = new Date(this.getFullYear(), 6, 1);
+  const jan = new Date(this.getFullYear(), 0, 1);
+  const jul = new Date(this.getFullYear(), 6, 1);
   return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
 };
 
@@ -138,13 +138,13 @@ module.exports = class OnvifServer {
       DeviceService: {
         Device: {
           GetSystemDateAndTime: (args) => {
-            let now = new Date();
+            const now = new Date();
 
-            let offset = now.getTimezoneOffset();
-            let abs_offset = Math.abs(offset);
-            let hrs_offset = Math.floor(abs_offset / 60);
-            let mins_offset = abs_offset % 60;
-            let tz =
+            const offset = now.getTimezoneOffset();
+            const abs_offset = Math.abs(offset);
+            const hrs_offset = Math.floor(abs_offset / 60);
+            const mins_offset = abs_offset % 60;
+            const tz =
               "UTC" +
               (offset < 0 ? "-" : "+") +
               hrs_offset +
@@ -187,7 +187,7 @@ module.exports = class OnvifServer {
           },
 
           GetCapabilities: (args) => {
-            let response = {
+            const response = {
               Capabilities: {},
             };
 
@@ -397,13 +397,13 @@ module.exports = class OnvifServer {
 
   listen(request, response) {
     try {
-      let action = url.parse(request.url, true).pathname;
+      const action = url.parse(request.url, true).pathname;
       this.logger.debug(
         `Solicitud recibida en: ${action} de ${request.socket.remoteAddress}`,
       );
 
       if (action === "/snapshot.png") {
-        let image = fs.readFileSync("./resources/snapshot.png");
+        const image = fs.readFileSync("./resources/snapshot.png");
         response.writeHead(200, { "Content-Type": "image/png" });
         response.end(image, "binary");
         this.logger.info(`Snapshot servido para ${this.config.name}`);
@@ -527,11 +527,11 @@ module.exports = class OnvifServer {
   }
 
   enableDebugOutput() {
-    this.deviceService.log = function (type, data, req) {
+    this.deviceService.log = (type, data, req) => {
       console.debug(`SERVER: ${data}`);
       //there is no logger in this context
     };
-    this.mediaService.log = function (type, data, req) {
+    this.mediaService.log = (type, data, req) => {
       console.debug(`SERVER: ${data}`);
       //there is no logger in this context
     };
@@ -564,7 +564,7 @@ module.exports = class OnvifServer {
         message.toString(),
         { tagNameProcessors: [xml2js["processors"].stripPrefix] },
         (err, result) => {
-          let probeUuid = result["Envelope"]["Header"][0]["MessageID"][0];
+          const probeUuid = result["Envelope"]["Header"][0]["MessageID"][0];
           let probeType = "";
           try {
             probeType = result["Envelope"]["Body"][0]["Probe"][0]["Types"][0];
@@ -578,7 +578,7 @@ module.exports = class OnvifServer {
             probeType === "" ||
             probeType.indexOf("NetworkVideoTransmitter") > -1
           ) {
-            let response = `<?xml version="1.0" encoding="UTF-8"?>
+            const response = `<?xml version="1.0" encoding="UTF-8"?>
                         <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.xmlsoap.org/ws/2005/04/discovery" xmlns:dn="http://www.onvif.org/ver10/network/wsdl">
                             <SOAP-ENV:Header>
                                 <wsa:MessageID>uuid:${uuid.v1()}</wsa:MessageID>
@@ -609,7 +609,7 @@ module.exports = class OnvifServer {
                         </SOAP-ENV:Envelope>`;
 
             this.discoveryMessageNo++;
-            let responseBuffer = Buffer.from(response);
+            const responseBuffer = Buffer.from(response);
 
             // Usar el socket existente para enviar la respuesta
             return this.discoverySocket.send(

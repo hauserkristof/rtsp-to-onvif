@@ -12,7 +12,7 @@ const parser = new argparse.ArgumentParser({
 
 parser.add_argument('config', { help: 'config filename to use', nargs: '?' });
 
-let args = parser.parse_args();
+const args = parser.parse_args();
 
 if (args) {
     if (process.env.DEBUG) {
@@ -24,12 +24,12 @@ if (args) {
         return -1;
     }
 
-    let config = readAndCheckConfig(logger, args.config)
+    const config = readAndCheckConfig(logger, args.config)
 
-    let proxies = {};
-    for (let onvifConfig of config.onvif) {
+    const proxies = {};
+    for (const onvifConfig of config.onvif) {
 
-        let server = new OnvifServer(logger, onvifConfig);
+        const server = new OnvifServer(logger, onvifConfig);
 
         if (server.getHostname()) {
 
@@ -52,8 +52,8 @@ if (args) {
         }
     }
 
-    for (let destinationAddress in proxies) {
-        for (let sourcePort in proxies[destinationAddress]) {
+    for (const destinationAddress in proxies) {
+        for (const sourcePort in proxies[destinationAddress]) {
             logger.info(`PROXY: ${sourcePort} --> ${destinationAddress}:${proxies[destinationAddress][sourcePort]}`);
             tcpProxy.createProxy(sourcePort, destinationAddress, proxies[destinationAddress][sourcePort]);
         }

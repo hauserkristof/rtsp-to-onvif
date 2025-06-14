@@ -37,14 +37,14 @@ function sleep(seconds) {
 }
 
 function readAndCheckConfig(logger, configFile) {
-  let config = readConfig(logger, configFile);
+  const config = readConfig(logger, configFile);
 
   let isSaveRequired = false;
   let proxyCounter = 0;
-  for (let onvifConfig of config.onvif) {
+  for (const onvifConfig of config.onvif) {
     //Generate a V4 UUID
     if (!onvifConfig.uuid) {
-      let newId = generateUUIDv4();
+      const newId = generateUUIDv4();
       logger.info(`CONFIG: UUIDv4 - ${newId}`);
       onvifConfig.uuid = newId;
       isSaveRequired = true;
@@ -52,7 +52,7 @@ function readAndCheckConfig(logger, configFile) {
 
     // Generate Network MAC for Unicast LAA Prefix
     if (!onvifConfig.mac) {
-      let newId = generateNetworkMac();
+      const newId = generateNetworkMac();
       logger.info(`CONFIG: MAC - ${newId}`);
       onvifConfig.mac = newId;
       isSaveRequired = true;
