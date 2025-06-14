@@ -442,7 +442,16 @@ module.exports = class OnvifServer {
     this.deviceService = soap.listen(this.server, {
       path: "/onvif/device_service",
       services: this.onvif,
-      xml: fs.readFileSync("./wsdl/device_service.wsdl", "utf8"),
+      // xml: fs.readFileSync("./wsdl/device_service.wsdl", "utf8"),
+      xml: `<?xml version="1.0" encoding="utf-8" ?>Add commentMore actions
+                    <wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:i0="http://www.onvif.org/ver10/device/wsdl" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://tempuri.org/">
+                      <wsdl:import namespace="http://www.onvif.org/ver10/device/wsdl" location="https://www.onvif.org/ver10/device/wsdl/devicemgmt.wsdl"/>
+                      <wsdl:service name="DeviceService">
+                        <wsdl:port name="Device" binding="i0:DeviceBinding">
+                          <soap:address location="http://${this.config.hostname}:${this.config.ports.server}/onvif/device_service"/>
+                        </wsdl:port>
+                      </wsdl:service>
+                    </wsdl:definitions>`,
       forceSoap12Headers: true,
     });
 
@@ -473,7 +482,16 @@ module.exports = class OnvifServer {
     this.mediaService = soap.listen(this.server, {
       path: "/onvif/media_service",
       services: this.onvif,
-      xml: fs.readFileSync("./wsdl/media_service.wsdl", "utf8"),
+      // xml: fs.readFileSync("./wsdl/media_service.wsdl", "utf8"),
+      xml: `<?xml version="1.0" encoding="utf-8" ?>Add commentMore actions
+                    <wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:i0="http://www.onvif.org/ver10/device/wsdl" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://tempuri.org/">
+                      <wsdl:import namespace="http://www.onvif.org/ver10/media/wsdl" location="https://www.onvif.org/ver10/media/wsdl/media.wsdl"/>
+                      <wsdl:service name="MediaService">
+                        <wsdl:port name="Media" binding="i0:MediaBinding">
+                          <soap:address location="http://${this.config.hostname}:${this.config.ports.server}/onvif/media_service" />
+                        </wsdl:port>
+                      </wsdl:service>
+                    </wsdl:definitions>`,
       forceSoap12Headers: true,
     });
 
